@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Platform, Tabs } from 'ionic-angular';
+import {NavController, NavParams, Platform, Tabs} from 'ionic-angular';
 
 import { CourseCenterPage } from '../course-center/course-center';
 import { MinePage } from '../mine/mine';
@@ -13,8 +13,9 @@ export class TabsPage {
   @ViewChild('myTabs') tabRef: Tabs;
   tabRoots: Object[];
 
-  constructor(public backButtonService: BackButtonService,
+  constructor(public navCtrl: NavController, public navParams: NavParams,public backButtonService: BackButtonService,
               public platform: Platform) {
+
     this.tabRoots = [
       {
         root: HomePage,
@@ -35,5 +36,8 @@ export class TabsPage {
     platform.ready().then(() => {
       this.backButtonService.registerBackButtonAction(this.tabRef);
     });
+  }
+  ionViewWillEnter() {
+    this.tabRef.select(1);
   }
 }

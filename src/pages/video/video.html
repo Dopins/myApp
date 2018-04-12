@@ -7,15 +7,30 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>视频</ion-title>
+    <ion-title>{{title}}</ion-title>
   </ion-navbar>
 
 </ion-header>
 
-<ion-content padding>
-  <ion-card>
-    <!--<video id="videoPlay"  controls="controls"  width="100%" ><source src="http://lms.ccnl.scut.edu.cn{{resourceUrl}}" type="video/mp4"></video>-->
-    <video width="100%" src="{{resourceUrl}}" controls="controls">
-    </video>
-  </ion-card>
+<ion-content>
+  <ion-list>
+    <ion-item *ngIf="hasVideo">
+      <ion-card >
+        <!--<video id="videoPlay"  controls="controls"  width="100%" ><source src="http://lms.ccnl.scut.edu.cn{{resourceUrl}}" type="video/mp4"></video>-->
+        <video width="100%" src="{{videoUrl}}" controls="controls">
+        </video>
+      </ion-card>
+    </ion-item>
+    <ion-item *ngIf="hasPDF" text-center>
+      <button *ngIf="btnViewPDF" ion-button (click)="viewPDF()" block>点击查看课件</button>
+       <ion-spinner name="dots" *ngIf="spinner"></ion-spinner>
+      <ion-card >
+        <pdf-viewer  [src]="pdfSrc" (after-load-complete)="afterLoadPDF()" [render-text]="true" [original-size]="false" style="display: block;">
+        </pdf-viewer>
+      </ion-card>
+    </ion-item>
+  </ion-list>
+
+
+
 </ion-content>

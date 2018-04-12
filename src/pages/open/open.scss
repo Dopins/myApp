@@ -1,0 +1,21 @@
+page-open {
+
+}
+
+.card-background-page {
+
+  ion-card {
+    position: relative;
+    text-align: center;
+  }
+  .card-title {
+    position: absolute;
+    top: 80%;
+    width: 100%;
+    font-weight: bold;
+    color: #fff;
+    font-family: "Microsoft YaHei";
+    font-size: 14px;
+  }
+
+}

@@ -1,0 +1,30 @@
+<!--
+  Generated template for the HomeworkPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>{{title}}</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+<ion-card>
+          <ion-item>
+          <h2 >
+            <ion-icon name="paper" [ngStyle]="{'color': '#4169E1'}"></ion-icon>
+            {{homework.hName}}
+          </h2>
+          <p >章节：{{homework.section}}</p>
+          <p >介绍：{{homework.hIntroduction}}</p>
+          <p >截止日期：{{homework.deadlineDate}}</p>
+          <p >已提交作业：{{homework.hsAttachName}}</p>
+          <p>上传作业：<input type="file" (change)="upload($event)"></p>
+          </ion-item>
+        </ion-card>
+</ion-content>

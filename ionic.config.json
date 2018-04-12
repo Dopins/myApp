@@ -4,15 +4,5 @@
   "type": "ionic-angular",
   "integrations": {
     "cordova": {}
-  },
-  "proxies": [
-    {
-      "path": "/lms",
-      "proxyUrl": "http://lms.ccnl.scut.edu.cn/lms"
-    },
-    {
-      "path": "/weblib",
-      "proxyUrl": "http://lms.ccnl.scut.edu.cn/weblib"
-    }
-  ]
+  }
 }

@@ -1,0 +1,73 @@
+<!--
+  Generated template for the FinalExamPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>期末考试</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+<ion-content>
+
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="choose">
+      <ion-segment-button value="paper">
+        试卷编辑
+      </ion-segment-button>
+      <ion-segment-button value="grade">
+        分数统计
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+
+  <div [ngSwitch]="choose">
+
+    <div *ngSwitchCase="'paper'">
+      <div *ngIf="slide">
+        <ion-list *ngFor="let quiz of quizs;let i = index">
+          <ion-item>{{i+1}}、{{quiz.question}}</ion-item>
+          <ion-item *ngFor="let item of quiz.options;let j = index">
+            {{letters[j]}}、{{item.option}}
+            <ion-icon name="checkmark-circle" *ngIf="item.answer=='true'" color="secondary" item-end></ion-icon>
+          </ion-item>
+        </ion-list>
+        <ion-item>
+          <ion-label>随机抽取的试卷题目</ion-label>
+          <ion-input type="number" [(ngModel)]="randomNum"></ion-input>
+        </ion-item>
+        <ion-item>
+          <button ion-button (click)="listCourseExams()" [ngStyle]="{'width': '50%'}" >预览</button>
+          <button ion-button (click)="setRandomExam()" [ngStyle]="{'width': '50%'}" >保存</button>
+        </ion-item>
+      </div>
+      <div *ngIf="!slide">
+        <ion-list *ngFor="let quiz of finalQuizs;let i = index">
+          <ion-item>{{i+1}}、{{quiz.question}}（）</ion-item>
+          <ion-item *ngFor="let item of quiz.options;let j = index">
+            {{letters[j]}}、{{item.option}}
+          </ion-item>
+        </ion-list>
+        <ion-item>
+          <button ion-button (click)="slideReturn()" [ngStyle]="{'width': '50%'}" >返回</button>
+          <button ion-button (click)="publishExam()" [ngStyle]="{'width': '50%'}" >确认发布</button>
+        </ion-item>
+      </div>
+
+    </div>
+
+    <div *ngSwitchCase="'grade'">
+        <ion-list *ngFor="let student of scoreList">
+          <ion-list-header>{{student.name}}</ion-list-header>
+          <ion-item *ngFor="let section of sections">
+            {{section.name}}:{{section.totalNum}}道题
+          </ion-item>
+        </ion-list>
+    </div>
+  </div>
+
+</ion-content>

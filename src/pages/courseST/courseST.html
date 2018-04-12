@@ -1,0 +1,48 @@
+
+<ion-header>
+
+    <ion-navbar>
+    <ion-title>编辑师生</ion-title>
+  </ion-navbar>
+
+  <ion-toolbar no-border-top>
+    <ion-segment (ionChange)="cleanCkeckedSet()" [(ngModel)]="segment">
+      <ion-segment-button value="student">
+        学生管理
+      </ion-segment-button>
+      <ion-segment-button value="teacher">
+        教师管理
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div [ngSwitch]="segment">
+    <ion-list *ngSwitchCase="'student'">
+      <ion-item>
+        <button ion-button >批量添加</button>
+      <button ion-button (click)="addUser('addStudent')">单个添加</button>
+      <button ion-button (click)=removeSelectedStudent()>移除选中</button>
+    </ion-item >
+      <ion-item *ngFor="let studentItem of studentItems" >
+       <ion-checkbox item-start (ionChange)="updateCucumber($event,'student',studentItem.id)"></ion-checkbox>
+        <ion-label >{{studentItem.account}} {{studentItem.name}}</ion-label>
+        <button ion-button item-end  (click)="openUserInfoPage(studentItem.account)">查看</button>
+      </ion-item>
+    </ion-list>
+
+    <ion-list *ngSwitchCase="'teacher'">
+        <ion-item>
+      <button ion-button (click)="addUser('addTeacher')">单个添加</button>
+      <button ion-button (click)="removeSelectedTeacher()">移除选中</button>
+    </ion-item >
+      <ion-item *ngFor="let teacherItem of teacherItems">
+        <ion-checkbox item-start (ionChange)="updateCucumber($event,'teacher',teacherItem.id)"></ion-checkbox>
+        <ion-label>{{teacherItem.username}} {{teacherItem.name}}</ion-label>
+         <button ion-button item-end  (click)="openUserInfoPage(teacherItem.username)">查看</button>
+      </ion-item>
+    </ion-list>
+
+  </div>
+</ion-content>

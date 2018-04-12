@@ -24,7 +24,7 @@ export class LoginPage {
 
   constructor(public modalCtrl: ModalController,   private backButtonService: BackButtonService,
               public platform: Platform, public toastCtrl: ToastController,private accountService:AccountService,
-              ) {
+  ) {
     platform.ready().then(() => {
       this.backButtonService.registerBackButtonAction(null);
     });
@@ -32,17 +32,17 @@ export class LoginPage {
 
   ngOnInit() {
 
-        this.username=localStorage.getItem("username");
-        this.password=localStorage.getItem("password");
-        if(localStorage.getItem("isSavePasssword")==null){
-          this.savePassword=true;
-        }else{
-          if(localStorage.getItem("isSavePasssword")=='Y'){
-            this.savePassword=true;
-          }else{
-            this.savePassword=false;
-          }
-        }
+    this.username=localStorage.getItem("username");
+    this.password=localStorage.getItem("password");
+    if(localStorage.getItem("isSavePasssword")==null){
+      this.savePassword=true;
+    }else{
+      if(localStorage.getItem("isSavePasssword")=='Y'){
+        this.savePassword=true;
+      }else{
+        this.savePassword=false;
+      }
+    }
 
   }
 
@@ -62,8 +62,8 @@ export class LoginPage {
       }).present();
     } else {
       let paramObj = {
-      username: this.username,
-      password:this.password
+        username: this.username,
+        password:this.password
       };
       this.accountService.login(paramObj).subscribe(res => {
         let result:string=res.result;
@@ -78,19 +78,21 @@ export class LoginPage {
             localStorage.setItem("isSavePasssword",'N');
           }
           this.weblibLoginStatus().subscribe(res=>{
-            if(res.status="login"){
+            if(res.status=="login"){
               localStorage.setItem("isLoginWeblib","Y");
               let modal = this.modalCtrl.create(TabsPage);
               modal.present();
-            }
-          },error=>{
-            this.initStoreType().subscribe(res=>{
+            }else{
+              this.initStoreType().subscribe(res=>{
               if(res.resule="success"){
                 this.loginWeblib(res.weblibUsername,res.weblibPasswd);
               }
             },error=>{
               console.log("error: "+error);
             })
+            }
+          },error=>{
+            console.log("error: "+error);
           });
         }else{
           this.toastCtrl.create({
@@ -111,6 +113,7 @@ export class LoginPage {
     }
   }
   loginWeblib(username,password){
+
     let weblibLoginParam = "account="+username+"&password="+password;
     this.accountService.loginWeblib(weblibLoginParam).subscribe(res=>{
       let result=res.members;

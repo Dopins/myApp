@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, ModalController,ToastController,Platform } from 'ionic-angular';
+import { NavController, ModalController,ToastController,Platform,AlertController } from 'ionic-angular';
 import { CreateLessionPage } from '../create-lession/create-lession'
 import { LoginPage } from "../login/login";
 import { AccountService} from "../../services/httpService/account.service"
@@ -12,10 +12,10 @@ import {PersonalInfoPage} from "../personalInfo/personalInfo";
 export class MinePage {
   userInfo;
   constructor(public navCtrl: NavController,public modalCtrl: ModalController,public toastCtrl: ToastController,public accountService:AccountService,
-              public platform: Platform) {
+              public platform: Platform,public alertCtrl: AlertController) {
 
   }
-  ionViewWillEnter(){
+  ionViewWillEnter(){ 
     this.getUserInfo();
   }
   getUserInfo() {
@@ -33,7 +33,27 @@ export class MinePage {
   createLession(){
     this.navCtrl.push(CreateLessionPage);
   }
-  logOut() {
+
+  confirmLogout(){
+     let confirm = this.alertCtrl.create({
+      title: '确认退出登录吗？',
+      buttons: [
+        {
+          text: '确定',
+          handler: () => {
+            this.logout();
+          }
+        },
+        {
+          text: '取消',
+          handler: () => {
+          }
+        }
+      ]
+    });
+     confirm.present();
+  }
+  logout() {
     this.accountService.logout().subscribe(res => {
       let result:string=res.result;
       if(result=='success'){

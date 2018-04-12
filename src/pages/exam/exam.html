@@ -1,0 +1,42 @@
+<!--
+  Generated template for the ExamPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>已发布:{{published}}  未发布:{{unpublished}}</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <ion-list *ngFor="let quiz of quizs">
+    <!--<ion-list-header>{{quiz.orderId}}.{{quiz.quizTitle}}</ion-list-header>-->
+    <ion-item-sliding>
+      <ion-item>{{quiz.orderId}}.{{quiz.quizTitle}}</ion-item>
+      <ion-item-options>
+        <button ion-button (click)="editSubject(quiz)" color="primary" icon-start>
+          <ion-icon name="create"></ion-icon>
+          Edit
+        </button>
+        <button ion-button (click)="deleteQuiz(quiz.quizId)" color="secondary" icon-start>
+          <ion-icon name="trash"></ion-icon>
+          Del
+        </button>
+      </ion-item-options>
+    </ion-item-sliding>
+    <ion-item *ngFor="let item of quiz.options">
+      {{item.optionTitle}}
+      <ion-icon name="checkmark-circle" *ngIf="item.answer" color="secondary" item-end></ion-icon>
+    </ion-item>
+  </ion-list>
+  <ion-item>
+    <button ion-button (click)="newSubject('-1')" [ngStyle]="{'width': '30%'}" >新增题目</button>
+    <button ion-button (click)="publishQuiz(1)" [ngStyle]="{'width': '30%'}"  >发布</button>
+    <button ion-button (click)="publishQuiz(0)" [ngStyle]="{'width': '30%'}" >取消发布</button>
+  </ion-item>
+</ion-content>

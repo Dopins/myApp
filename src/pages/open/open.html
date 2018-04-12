@@ -1,0 +1,71 @@
+<!--
+  Generated template for the OpenPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+    <ion-navbar>
+    <ion-title>{{openCourse.introduction}}</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding class="card-background-page">
+  <ion-card >
+    <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{openCourse.filepath}}" alt="">
+    <div class="card-title">
+      <button ion-button outline (click)="joinOpenCourse(courseId)">加入学习</button>
+    </div>
+  </ion-card>
+  <ion-toolbar no-border-top>
+    <ion-segment [(ngModel)]="choose">
+      <ion-segment-button value="chapter">
+        章节
+      </ion-segment-button>
+      <ion-segment-button value="introduction">
+        简介
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+  <div [ngSwitch]="choose">
+    <div *ngSwitchCase="'chapter'">
+      <ion-list *ngFor="let section of openSection">
+        <ion-list-header>{{section.name}}</ion-list-header>
+        <ion-item-sliding *ngFor="let chapter of section.unit">
+          <button ion-item icon-start>
+            <ion-icon name="logo-youtube" [ngStyle]="{'color': '#4169E1'}" item-start></ion-icon>
+            {{chapter.name}}
+          </button>
+          <ion-item-options>
+            <button ion-button color="primary" icon-start>
+              <ion-icon name="create"></ion-icon>
+              Edit
+            </button>
+            <button ion-button color="secondary" icon-start>
+              <ion-icon name="trash"></ion-icon>
+              Del
+            </button>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </div>
+
+    <div *ngSwitchCase="'introduction'">
+      <ion-card>
+        <ion-card-header>{{openCourse.name}}</ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item>认证学分:{{openCourse.credit}}</ion-item>
+            <ion-item>授课时间:{{openCourse.startDateString}}-{{openCourse.endDateString}}</ion-item>
+            <ion-item>授课教师:{{openCourse.courseTeacherString}}</ion-item>
+            <ion-item>课程介绍:{{openCourse.introduction}}</ion-item>
+            <ion-item>访问人数:{{openCourse.visits}}</ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

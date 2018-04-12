@@ -1,13 +1,20 @@
-<ion-content>
+<ion-content >
       <ion-card *ngFor="let openItem of openItems" >
-          <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{openItem.filepath}}">
-<!--         <ion-card-content>
-          <ion-card-title>
-            {{openItem.name}}
-          </ion-card-title>
-          <p>
-            {{openItem.introduction}}
-          </p>
-        </ion-card-content> -->
+        <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{openItem.filepath}}">
+        <ion-card-title padding>{{openItem.name}}</ion-card-title>
+        <ion-row>
+          <ion-col>
+            <button ion-button icon-left clear small>
+              <ion-icon name="people"></ion-icon>
+              <div>{{openItem.courseTeacherString}}</div>
+            </button>
+          </ion-col>
+          <ion-col>
+            <button ion-button (click)="pushOpenPage(openItem.id)" icon-end clear small>
+              <div>进入</div>
+              <ion-icon name="arrow-forward"></ion-icon>
+            </button>
+          </ion-col>
+        </ion-row>
       </ion-card>
 </ion-content>

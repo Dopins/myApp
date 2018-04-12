@@ -14,25 +14,26 @@
 <ion-content padding>
   <div [ngSwitch]="segment">
     <ion-list *ngSwitchCase="'study'">
-      <ion-item *ngFor="let studyItem of studyItems" >
+      <ion-item  *ngFor="let studyItem of studyItems" (click)="openDetailPageOfStu(studyItem.id)" >
         <ion-thumbnail item-start>
           <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{studyItem.filepath}}">
         </ion-thumbnail>
         <h3>{{studyItem.name}}</h3>
         <p>{{studyItem.introduction}}</p>
-        <button ion-button (click)="openDetailPageByStu(studyItem.id)" clear item-end>查看</button>
+        <!--<button ion-button (click)="openDetailPageOfStu(studyItem.id)" item-end>查看</button>-->
       </ion-item>
     </ion-list>
 
     <ion-list *ngSwitchCase="'teach'">
-      <ion-item *ngFor="let teachItem of teachItems">
-        <ion-thumbnail item-start>
-          <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{teachItem.filepath}}">
-        </ion-thumbnail>
-        <h3>{{teachItem.name}}</h3>
-        <p>{{teachItem.introduction}}</p>
-        <button ion-button (click)="openDetailPageByTea(teachItem.id)" clear item-end>查看</button>
-      </ion-item>
+        <ion-item *ngFor="let teachItem of teachItems" (click)="openTeacherPage(teachItem.id)" (press)="presentActionSheet($event, teachItem.id)">
+          <ion-thumbnail item-start>
+            <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{teachItem.filepath}}">
+          </ion-thumbnail>
+          <h3>{{teachItem.name}}</h3>
+          <p>{{teachItem.introduction}}</p>
+          <!--<button ion-button (click)="openTeacherPage(teachItem.id)" item-end>查看</button>-->
+        </ion-item>
+      <ion-item><button ion-button (click)="createCourse()" block>创建课程</button></ion-item>
     </ion-list>
 
   </div>
