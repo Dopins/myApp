@@ -14,6 +14,7 @@ import "rxjs/add/observable/throw";
 export class HttpRequestService {
 
   host: string='http:\/\/lms.ccnl.scut.edu.cn';
+  defaultHost:string='http:\/\/lms.ccnl.scut.edu.cn';
 
   initParam: string='/lms/json/learning/initStoreType';//初始化Common类的三个变量
   loginWeblib:string= '/weblib/login/authenticate.action';
@@ -45,7 +46,6 @@ export class HttpRequestService {
   getCourseWare:string= '/lms/json/learning/getCourseware';//教学元素的课件资源
   listDiscuss:string="/lms/json/learning/listDiscuss";
   listSHomework:string="/lms/json/learning/listSHomework";
-  listMessage:string="/lms/json/learning/listMessage";
   listOpenResource: string = "/lms/json/learning/listOpenResource" //获取某一公开课的详细信息
   joinOpenCourse: string = "/lms/json/learning/joinOpenCourse"  //加入某一门公开课
   quitOpenCourse: string = "/lms/json/learning/quitOpenCourse" //退出某一门公开课
@@ -61,6 +61,12 @@ export class HttpRequestService {
   listQuizResultStat:string='/lms/json/learning/listQuizResultStat';
   formAccount:string= '/lms/json/account/';
   saveAccount: string='/lms/json/account/save';//修改个人信息
+  saveDiscuss: string = '/lms/json/learning/saveDiscuss';
+  deleteDiscuss: string = '/lms/json/learning/deleteDiscuss';
+  getUnits : string = '/lms/json/course/getUnits';
+  listReply:string = '/lms/json/learning/listReply';
+  saveReply:string = '/lms/json/learning/saveReply';
+  deleteReply:string = '/lms/json/learning/deleteReply';
 
   courseThumbnail:string='/lms/json/learning/formThumbnail';//获取课程缩略图
   initFileUpload:string = '/lms/json/learning/initFileUpload'; //获取文件上传（weblib） 所需的参数（groupId、parentId、cooliewId）
@@ -94,6 +100,13 @@ export class HttpRequestService {
   listCourseRandomExam:string = '/lms/json/learning/listCourseRandomExams';
   publishCourseExams:string = '/lms/json/creator/publishCourseExams';
   listStudentScore:string = '/lms/json/learning/listStudentQuizScoreByCourse';
+  listMessage:string = '/lms/json/learning/listMessage';
+  saveMessage:string = '/lms/json/learning/saveMessage';
+  deleteMessage:string = '/lms/json/learning/deleteMessage';
+  getHomeworkTable:string = '/lms/json/learning/checkHomework';
+  saveScore:string = '/lms/json/learning/saveHS';
+  removeHomework:string = '/lms/json/learning/deleteHomeworkStudent';
+  copyCourse:string = '/lms/json/creator/copyCourse';
 
     constructor(private http: Http) {
 
@@ -133,6 +146,19 @@ export class HttpRequestService {
           withCredentials: true
         }
       ).map(res => res.json());
+    }
+
+    setCurrentHost(host){
+      this.host=host;
+    }
+    getCurrentHost(){
+      return this.host;
+    }
+    getDefaultHost(){
+      return this.defaultHost;
+    }
+    getDefaultHostItems(){
+      return [this.defaultHost,'http:\/\/lms.scn.cn']
     }
 
 

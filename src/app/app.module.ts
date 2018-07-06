@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { LoginPage } from '../pages/login/login'
 import { CourseCenterPage } from '../pages/course-center/course-center';
 import { MinePage } from '../pages/mine/mine';
-import { CreateLessionPage } from '../pages/create-lession/create-lession'
 import { HomePage } from '../pages/home/home';
 import { DetailPage } from '../pages/detail/detail'
 import { TabsPage } from '../pages/tabs/tabs';
@@ -23,6 +22,10 @@ import { FormPage } from "../pages/form/form";
 import { CourseSTPage } from "../pages/courseST/courseST";
 import { CourseSTFormPage } from "../pages/courseSTForm/courseSTForm";
 import { ExamPage } from "../pages/exam/exam";
+import { ChangeHostPage } from "../pages/changeHost/changeHost";
+import { CorrectionPage } from "../pages/correction/correction";
+import { CorrectionDetailPage } from "../pages/correctionDetail/correctionDetail";
+import { CorrectionPersonPage } from "../pages/correctionPerson/correctionPerson";
 
 import { BackButtonService } from '../services/uiService/backButton.service';
 import { HttpRequestService } from '../services/httpService/httpRequest.service';
@@ -35,6 +38,30 @@ import {TeacherService} from "../services/httpService/teacher.service";
 import {SubjectPage} from "../pages/subject/subject";
 import {FinalExamPage} from "../pages/final-exam/final-exam";
 
+import { NativeStorage } from '@ionic-native/native-storage';
+
+class NativeStorageMock extends NativeStorage {
+  setItem(reference, value){
+    return new Promise((resolve, reject) => {
+        localStorage.setItem(reference,value.toString());
+    })
+  }
+  getItem(reference){
+     return new Promise((resolve, reject) => {
+        let value=localStorage.getItem(reference);
+        if(value==null){
+            reject();
+        }else{
+            let array=value.split(',');
+            if(array.length>1){
+                resolve(array);
+            }else{
+                resolve(value);
+            }
+        }
+    })
+  }
+}
 
 
 @NgModule({
@@ -43,7 +70,6 @@ import {FinalExamPage} from "../pages/final-exam/final-exam";
     LoginPage,
     CourseCenterPage,
     MinePage,
-    CreateLessionPage,
     HomePage,
     HomeworkPage,
     PersonalInfoPage,
@@ -57,8 +83,12 @@ import {FinalExamPage} from "../pages/final-exam/final-exam";
     CourseSTPage,
     CourseSTFormPage,
     ExamPage,
+    ChangeHostPage,
     SubjectPage,
-    FinalExamPage
+    FinalExamPage,
+    CorrectionPage,
+    CorrectionDetailPage,
+    CorrectionPersonPage
   ],
   imports: [
     BrowserModule,
@@ -74,7 +104,6 @@ import {FinalExamPage} from "../pages/final-exam/final-exam";
     CourseCenterPage,
     PersonalInfoPage,
     MinePage,
-    CreateLessionPage,
     HomePage,
     HomeworkPage,
     DetailPage,
@@ -88,7 +117,11 @@ import {FinalExamPage} from "../pages/final-exam/final-exam";
     CourseSTFormPage,
     ExamPage,
     SubjectPage,
-    FinalExamPage
+    FinalExamPage,
+    ChangeHostPage,
+    CorrectionPage,
+    CorrectionDetailPage,
+    CorrectionPersonPage
   ],
   providers: [
     StatusBar,
@@ -98,6 +131,8 @@ import {FinalExamPage} from "../pages/final-exam/final-exam";
     AccountService,
     CourseService,
     TeacherService,
+    NativeStorage,
+    //{provide: NativeStorage, useClass: NativeStorageMock},
     {provide: ErrorHandler, useClass: IonicErrorHandler},
   ]
 })

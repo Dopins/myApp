@@ -14,12 +14,12 @@
 
 <ion-content>
   <ion-list>
-    <ion-item *ngIf="hasVideo">
-      <ion-card >
-        <!--<video id="videoPlay"  controls="controls"  width="100%" ><source src="http://lms.ccnl.scut.edu.cn{{resourceUrl}}" type="video/mp4"></video>-->
-        <video width="100%" src="{{videoUrl}}" controls="controls">
+    <ion-item class="videoHeight" *ngIf="hasVideo">
+        <div *ngIf="!videoPlay" class="loading">
+          <ion-spinner name="circles"></ion-spinner>
+        </div>
+        <video #videoElem src="{{videoUrl}}" (canplay)="loadVideo(videoElem)"  autoplay="autoplay" controls="controls" >
         </video>
-      </ion-card>
     </ion-item>
     <ion-item *ngIf="hasPDF" text-center>
       <button *ngIf="btnViewPDF" ion-button (click)="viewPDF()" block>点击查看课件</button>

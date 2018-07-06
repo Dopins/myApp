@@ -15,10 +15,7 @@
 
 <ion-content padding class="card-background-page">
   <ion-card >
-    <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{openCourse.filepath}}" alt="">
-    <div class="card-title">
-      <button ion-button outline (click)="joinOpenCourse(courseId)">加入学习</button>
-    </div>
+    <img src="{{ host }}/lms/custom/{{openCourse.filepath}}" onerror="this.src='./assets/imgs/course.png'" style="height:200px;">
   </ion-card>
   <ion-toolbar no-border-top>
     <ion-segment [(ngModel)]="choose">
@@ -28,6 +25,9 @@
       <ion-segment-button value="introduction">
         简介
       </ion-segment-button>
+      <ion-segment-button value="join">
+        加入学习
+      </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
   <div [ngSwitch]="choose">
@@ -35,20 +35,10 @@
       <ion-list *ngFor="let section of openSection">
         <ion-list-header>{{section.name}}</ion-list-header>
         <ion-item-sliding *ngFor="let chapter of section.unit">
-          <button ion-item icon-start>
+          <button (click)="displayTip()" ion-item icon-start>
             <ion-icon name="logo-youtube" [ngStyle]="{'color': '#4169E1'}" item-start></ion-icon>
             {{chapter.name}}
           </button>
-          <ion-item-options>
-            <button ion-button color="primary" icon-start>
-              <ion-icon name="create"></ion-icon>
-              Edit
-            </button>
-            <button ion-button color="secondary" icon-start>
-              <ion-icon name="trash"></ion-icon>
-              Del
-            </button>
-          </ion-item-options>
         </ion-item-sliding>
       </ion-list>
     </div>
@@ -66,6 +56,10 @@
           </ion-list>
         </ion-card-content>
       </ion-card>
+    </div>
+
+    <div *ngSwitchCase="'join'">
+      <button ion-button (click)="joinOpenCourse(courseId)" block>加入学习</button>
     </div>
   </div>
 </ion-content>

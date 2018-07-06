@@ -1,12 +1,17 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform, ToastController, AlertController } from 'ionic-angular';
+import {NavController, NavParams, Platform, ToastController, AlertController} from 'ionic-angular';
 import {CourseService} from "../../services/httpService/course.service";
 import {FormPage} from "../form/form";
+import { CorrectionPage } from "../correction/correction";
 import {CourseSTPage} from '../courseST/courseST';
 import {TeacherService} from "../../services/httpService/teacher.service";
 import {FileUploadParam} from "../../model/FileUploadParam";
 import {ExamPage} from "../exam/exam";
 import {FinalExamPage} from "../final-exam/final-exam";
+import {VideoPage} from "../video/video";
+import {Message} from "../../model/Message";
+import {Discuss} from "../../model/Discuss"
+import {HttpRequestService} from "../../services/httpService/httpRequest.service";
 
 /**
  * Generated class for the TeacherPage page.
@@ -20,21 +25,33 @@ import {FinalExamPage} from "../final-exam/final-exam";
   templateUrl: 'teacher.html',
 })
 export class TeacherPage {
+  host:string;
   courseDetail={};
+  currentUser:string;
+  startDate:string;
+  endDate:string;
   courseId:string;
   fileParam:FileUploadParam = new FileUploadParam('','','');
   courseResource:any;
-  discussList:any[];
-  messageList:Object[];
+  messageList:Message[];
   homeworkList = new Array();
-  progressList:Object[];
+  discussList:Discuss[] = [];
   sectionNum:number = 0;
-
-
+  newMessage:Message = new Message('','','','','',false);
+  addNewMessage:boolean = false;
+  units:any[];
+  unitId:number;
+  newDiscuss:Discuss = new Discuss('','','','','','','','',0,0,false);
+  addNewDiscuss:boolean = false;
+  replyList:any[] = [];
+  newReply:boolean = true;
+  replyContent:string;
   choose: string = "chapter";
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public courseService:CourseService,public teacherService:TeacherService, public toastCtrl: ToastController, public alertCtrl: AlertController, public platform: Platform) {
+  constructor(public navCtrl: NavController, public navParams: NavParams,private httpRequestService:HttpRequestService, public courseService:CourseService,public teacherService:TeacherService,
+              public toastCtrl: ToastController, public alertCtrl: AlertController,  public platform: Platform) {
     platform.ready().then(() => {
+      this.host =  httpRequestService.getCurrentHost();
       this.courseId = navParams.get('id');
       this.initFileUpload(this.courseId);
     });
@@ -45,7 +62,11 @@ export class TeacherPage {
     this.getCourseResource(this.courseId, "teacher");
     this.getDiscussList(this.courseId);
     this.getMessageList(this.courseId);
-    this.getProgress(this.courseId);
+    this.getUnits();
+  }
+
+  openVideoPage(uid){
+    this.navCtrl.push(VideoPage,  { id : uid });
   }
 
   pushExam(id) {
@@ -54,7 +75,7 @@ export class TeacherPage {
 
   pushForm(formType)
   {
-    this.navCtrl.push(FormPage, { id : this.courseId, type : formType, order:this.sectionNum });
+    this.navCtrl.push(FormPage, { id : this.courseId, type : formType, order:this.sectionNum, startDate:this.startDate, endDate:this.endDate });
   }
 
   pushFinalExam()
@@ -69,12 +90,16 @@ export class TeacherPage {
 
   editHomework(sectionId, homeworkId)
   {
-    this.navCtrl.push(FormPage, { sectionId:sectionId, homeworkId:homeworkId, fileParam:this.fileParam, type:'homework' })
+    this.navCtrl.push(FormPage, { sectionId:sectionId, homeworkId:homeworkId, fileParam:this.fileParam, type:'homework', endDate:this.endDate })
   }
 
   editUnit(sectionId, unitId)
   {
-    this.navCtrl.push(FormPage, { sectionId:sectionId, unitId:unitId, fileParam:this.fileParam, type:'unit' })
+    this.navCtrl.push(FormPage, { sectionId:sectionId, unitId:unitId, fileParam:this.fileParam, type:'unit', startDate:this.startDate, endDate:this.endDate })
+  }
+
+  openCorrection(id){
+    this.navCtrl.push(CorrectionPage,{id:id,courseId:this.courseId});
   }
 
   deleteSection(id)
@@ -187,28 +212,165 @@ export class TeacherPage {
     };
     this.courseService.listDiscuss(paramObj).subscribe( res => {
       if(res.result=='success') {
-        this.discussList=res.discuss;
+        let discusses:any = res.discuss;
+        this.discussList = [];
+        for(let discuss of discusses){
+          if(discuss.unitName.length > 5){
+            discuss.unitName = discuss.unitName.substr(0,5)+"..";
+          }
+          let item:Discuss = new Discuss(discuss.id, discuss.creatorId, discuss.creatorName, discuss.createDateString, discuss.content, discuss.photo, discuss.unitId, discuss.unitName, discuss.upvoteCount, discuss.replyCount,false);
+          this.discussList.push(item);
+        }
       }
     },error=>{
       console.log("error:"+error);
     })
   }
 
-  doUpvote(id){
+  showReplyList(discuss){
+    if(discuss.expand){
+      discuss.expand = false;
+    }
+    else{
+      for(let item of this.discussList) {
+        if (item.expand) {
+          item.expand = false;
+        }
+      }
+      if(discuss.replyCount == 0){
+        this.replyList = [];
+        discuss.expand = true;
+        return;
+      }
+      this.getReplyList(discuss);
+      discuss.expand = true;
+    }
+  }
+
+  getReplyList(discuss){
+      let param = {
+        id : discuss.id
+      };
+      this.replyList = [];
+      this.courseService.listReply(param).subscribe( res => {
+        if(res.result == "success"){
+          this.replyList = res.reply;
+          this.currentUser = res.currentUser;
+        }
+      }, error => {} );
+  }
+
+  deleteReply(id,discuss){
+    let param = {
+      id : id
+    };
+    this.courseService.deleteReply(param).subscribe(res => {
+      if(res.result == "success"){
+        this.toastCtrl.create({
+          message: '删除成功',
+          duration: 1000,
+          position: 'top'
+        }).present();
+        discuss.replyCount -= 1;
+        this.getReplyList(discuss);
+      }
+    }, error => {})
+  }
+
+  addReply(){
+    this.newReply = false;
+  }
+
+  saveReply(discuss){
+    let model = {
+      id : discuss.id,
+      content : this.replyContent
+    };
+    this.courseService.saveReply(model).subscribe( res => {
+      if(res.result == "success"){
+        this.newReply = true;
+        discuss.replyCount = res.count;
+        this.getReplyList(discuss);
+      }
+    },error => {} );
+  }
+
+  closeReply(){
+    this.newReply = true;
+  }
+
+  addDiscuss(){
+    this.newDiscuss.id = '';
+    this.newDiscuss.content = '';
+    this.unitId = 0;
+    this.addNewDiscuss = true;
+  }
+
+  closeDiscuss(){
+    this.addNewDiscuss = false;
+  }
+
+  getUnits(){
+    let param = {
+      courseId : this.courseId
+    };
+    this.courseService.getUnits(param).subscribe( res => {
+      if(res.result == "success"){
+        this.units = res.units;
+      }
+    }, error => {} )
+  }
+
+  saveDiscuss(){
+    let model =  {
+      discussId : this.newDiscuss.id,
+      courseId : this.courseId,
+      content : this.newDiscuss.content,
+      unitId : this.unitId
+    };;
+    this.courseService.saveDiscuss(model).subscribe( res =>{
+      if(res.result == "success"){
+        this.toastCtrl.create({
+          message: '保存成功',
+          duration: 1000,
+          position: 'top'
+        }).present();
+        this.addNewDiscuss = false;
+        this.getDiscussList(this.courseId);
+      }
+    }, error => {});
+
+  }
+
+  deleteDiscuss(id){
+    let param = {
+      discussId : id
+    };
+    this.courseService.deleteDiscuss(param).subscribe( res => {
+      if(res.result == "success"){
+        this.toastCtrl.create({
+          message: '删除成功',
+          duration: 1000,
+          position: 'top'
+        }).present();
+        this.getDiscussList(this.courseId);
+      }
+    }, error => {} );
+  }
+
+  editDiscuss(discuss){
+    this.newDiscuss = discuss;
+    this.unitId = discuss.unitId;
+    this.addNewDiscuss = true;
+  }
+
+  doUpvote(discuss){
     let paramObj = {
-      id:id
+      id:discuss.id
     }
     this.courseService.doUpvote(paramObj).subscribe(res => {
       if(res.result == "success"){
-        for(let i =0;i<this.discussList.length;i++){
-          if(this.discussList[i].id == id){
-            this.discussList[i].id = res.count;
-            break;
-          }
-        }
-      }
-      else{
-        console.log("doUpvote Failed");
+        discuss.upvoteCount = res.count;
       }
     }, error => {
       console.log("error:"+error);
@@ -222,6 +384,8 @@ export class TeacherPage {
     this.courseService.courseDetail(paramObj).subscribe( res => {
       if(res.result=='success'){
         this.courseDetail = res;
+        this.startDate = res.startDate.split(' ')[0];
+        this.endDate = res.endDate.split(' ')[0];
       }else{
         this.toastCtrl.create({
           message: '获取课程详情出错',
@@ -272,27 +436,92 @@ export class TeacherPage {
     let paramObj = {
       courseId: cid
     };
+    this.messageList = [];
     this.courseService.listMessage(paramObj).subscribe( res => {
       if(res.result=='success') {
-        this.messageList=res.message;
+        let mList:any[]=res.message;
+        for(let message of mList){
+          let date = message.createDate.split(' ');
+          let createDate = date[0].substr(5)+' '+date[1].substr(0,5);
+          let m:Message = new Message(message.id, message.content, message.creatorName, message.photo, createDate,false);
+          this.messageList.push(m);
+        }
       }
     },error=>{
       console.log("error:"+error);
     })
   }
 
+  saveMessage() {
+    let param = {
+      messageId : this.newMessage.messageId,
+      courseId : this.courseId,
+      content : this.newMessage.content
+    };
+    this.teacherService.saveMessage(param).subscribe( res => {
+      if(res.result == 'success'){
+        this.addNewMessage = false;
+        this.getMessageList(this.courseId);
+        this.toastCtrl.create({
+          message: '操作完成',
+          duration: 1000,
+          position: 'top'
+        }).present();
+      }
+    }, error => {} );
+  }
+
+  addMessage() {
+    this.addNewMessage = true;
+  }
+
+  closeAddNew(){
+    this.addNewMessage = false;
+  }
+
+  expand(message){
+    message.expand = true;
+  }
+
+  packUp(message){
+    message.expand = false;
+  }
+
+  editMessage(message) {
+    this.addNewMessage = true;
+    this.newMessage = message;
+  }
+
+  deleteMessage(message) {
+    let model = {
+      messageId : message.messageId
+    };
+    this.teacherService.deleteMessage(model).subscribe( res => {
+      if(res.result == 'success'){
+        this.getMessageList(this.courseId);
+        this.toastCtrl.create({
+          message: '删除成功',
+          duration: 1000,
+          position: 'top'
+        }).present();
+      }
+    }, error=>{} )
+  }
+
   getHomeworkList(){
+    this.homeworkList = new Array();
     for(let i = 0;i<this.sectionNum;i++){
       let sectionName = this.courseResource[i].name;
       for(let j=0;j<this.courseResource[i].homework.length;j++){
         let homeworkName = this.courseResource[i].homework[j].name;
         let endDate = this.courseResource[i].homework[j].endDate;
+        let id = this.courseResource[i].homework[j].id;
         let homework = {
           "sectionName":sectionName,
           "homeworkName":homeworkName,
-          "endDate":endDate
+          "endDate":endDate,
+          "id":id
         }
-        //console.log("sectionName:"+sectionName+" "+"homeworkname:"+homeworkName+" "+"endDate:"+endDate);
         this.homeworkList.push(homework);
       }
     }
@@ -302,28 +531,5 @@ export class TeacherPage {
       this.navCtrl.push(CourseSTPage,  { courseId: this.courseId });
   }
 
-  getProgress(cid){
-    let paramObj = {
-      courseId: cid
-    };
-    this.teacherService.listProgress(paramObj).subscribe( res => {
-      console.log(res);
-      if(res.result == "success")
-      {
-        this.progressList = res.progress;
-      }
-      else
-      {
-        this.toastCtrl.create({
-          message: '获取学习进度失败',
-          duration: 1000,
-          position: 'top'
-        }).present();
-      }
-
-    }, error => {
-
-    });
-  }
 
 }

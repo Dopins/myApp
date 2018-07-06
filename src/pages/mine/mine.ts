@@ -1,26 +1,31 @@
 import { Component } from '@angular/core';
 import { NavController, ModalController,ToastController,Platform,AlertController } from 'ionic-angular';
-import { CreateLessionPage } from '../create-lession/create-lession'
 import { LoginPage } from "../login/login";
 import { AccountService} from "../../services/httpService/account.service"
 import {PersonalInfoPage} from "../personalInfo/personalInfo";
+
+import { NativeStorage } from '@ionic-native/native-storage';
+import {HttpRequestService} from "../../services/httpService/httpRequest.service";
 
 @Component({
   selector: 'page-mine',
   templateUrl: 'mine.html'
 })
 export class MinePage {
-  userInfo;
-  constructor(public navCtrl: NavController,public modalCtrl: ModalController,public toastCtrl: ToastController,public accountService:AccountService,
-              public platform: Platform,public alertCtrl: AlertController) {
-
+  userInfo:any;
+  photo:string;
+  host:string;
+  constructor(public nativeStorage: NativeStorage,public navCtrl: NavController,public modalCtrl: ModalController,public toastCtrl: ToastController,public accountService:AccountService,
+              private httpRequestService:HttpRequestService, public platform: Platform,public alertCtrl: AlertController) {
+      this.host = httpRequestService.getCurrentHost();
   }
-  ionViewWillEnter(){ 
+  ionViewWillEnter(){
     this.getUserInfo();
   }
   getUserInfo() {
     this.accountService.getUserInfo().subscribe(res=>{
       this.userInfo=res;
+      this.photo = this.host + "/lms/custom/"+this.userInfo.photo;
     },error=>{
       console.log("error:"+error);
     })
@@ -28,10 +33,6 @@ export class MinePage {
 
   changePersonalInfo(){
     this.navCtrl.push(PersonalInfoPage,  this.userInfo );
-  }
-
-  createLession(){
-    this.navCtrl.push(CreateLessionPage);
   }
 
   confirmLogout(){
@@ -57,6 +58,12 @@ export class MinePage {
     this.accountService.logout().subscribe(res => {
       let result:string=res.result;
       if(result=='success'){
+        this.accountService.closeConnection();
+        //localStorage.setItem("isLogin",'false');
+        this.nativeStorage.setItem('isLogin', 'false').then(
+            () => console.log('Stored item!'),
+            error => console.error('Error storing item', error)
+            );
         let modal = this.modalCtrl.create(LoginPage);
         modal.present();
       }else{

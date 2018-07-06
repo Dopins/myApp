@@ -1,4 +1,46 @@
 page-home {
+  ion-label{
+    white-space: normal;
+  }
+    ion-card-title{
+        font-family: "Microsoft YaHei";
+    }
+    .courseTeacher{
+        font-family: "Microsoft YaHei";
+    }
+    .item-ios ion-thumbnail {
+     min-width:80px;
+     min-height:56px;
+   }
+  .item-ios ion-thumbnail img {
+    width:80px;
+    height:56px;
+  }
+  .item-md ion-thumbnail {
+    min-width:80px;
+    min-height:56px;
+  }
+  .item-md ion-thumbnail img {
+    width:80px;
+    height:56px;
+  }
+  .segment-ios .segment-button{
+    color: rgba(60, 60, 60, 0.7);
+  }
+  .segment-md .segment-button{
+    color: rgba(60, 60, 60, 0.7);
+    border-bottom: none;
+  }
+  .segment-ios .segment-activated{
+    color: #488aff;
+  }
+  .segment-md .segment-activated{
+    color: #488aff;
+  }
+  .item-md p{
+    font-size: 1rem;
+    margin: 5px 0 2px 0;
+  }
 
 }
 

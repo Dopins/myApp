@@ -1,0 +1,32 @@
+<!--
+  Generated template for the CreateLessionPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+  <ion-navbar>
+    <ion-title>选择服务器</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <ion-list radio-group [(ngModel)]="currentHost">
+
+  <ion-item *ngFor="let hostItem of hostItems" >
+    <ion-label>{{hostItem}}</ion-label>
+    <ion-radio item-start value={{hostItem}}></ion-radio>
+    <button (click)="removeHost(hostItem)" ion-button clear small item-end>删除</button>
+  </ion-item>
+
+</ion-list>
+
+<button ion-button (click)="addHost()" clear>
+  新增服务器
+</button>
+  <div padding>
+    <button ion-button (click)="saveHost()" block>保存</button>
+</div>
+
+
+</ion-content>

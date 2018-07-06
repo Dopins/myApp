@@ -18,6 +18,9 @@ export class HomeworkPage {
   homework;
   parentId;
   groupId;
+  attach;
+  attachType;
+  attachName;
 
   constructor(public navCtrl: NavController, public navParams: NavParams,public courseService:CourseService,
     public toastCtrl: ToastController,public loadingCtrl: LoadingController) {
@@ -31,8 +34,6 @@ export class HomeworkPage {
     let type = e.target.files[0].name.split('.')[1];
     if(e.target.files[0]&&this.isHomework(type)){
       const file = e.target.files[0];
-
-      let attach,attachType;
 
       let formData:FormData = new FormData();
       formData.append('groupId',this.groupId);
@@ -48,9 +49,10 @@ export class HomeworkPage {
       loading.present();
       this.courseService.uploadResourse(formData).subscribe(res =>{
         loading.dismiss();
-        attach = res.file[0].id;
-        attachType = res.file[0].ext;
-        this.submit(this.homework.hsId,attach,attachType,file.name);
+        this.attach = res.file[0].id;
+        this.attachType = res.file[0].ext;
+        this.attachName = file.name;
+        this.submit();
       })
     }else{
       this.toastCtrl.create({
@@ -69,23 +71,23 @@ export class HomeworkPage {
     }
   }
 
-  submit(homeworkId,attach,attachType,attachName){
-
-    let dData = new URLSearchParams();
-    dData.set('groupId',this.groupId);
-    dData.set('parentId',this.parentId);
-    dData.set('homeworkId',homeworkId);
-    dData.set('attach',attach);
-    dData.set('attachType',attachType);
-    dData.set('attachName',attachName);
-    this.courseService.submitHomework(dData.toString()).subscribe(res =>{
+  submit(){
+    let dData = {
+      groupId:this.groupId,
+      parentId:this.parentId,
+      homeworkId:this.homework.hsId,
+      attach:this.attach,
+      attachType:this.attachType,
+      attachName:this.attachName
+    }
+    this.courseService.submitHomework(dData).subscribe(res =>{
         this.toastCtrl.create({
           message: res.message,
           duration: 2000,
           position: 'middle'
         }).present();
     })
-    this.homework.hsAttachName=attachName;
+    this.homework.hsAttachName=this.attachName;
   }
 
 }

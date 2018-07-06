@@ -9,7 +9,7 @@ page-teacher {
   }
   .card-title {
     position: absolute;
-    top: 36%;
+    top: 75%;
     width: 100%;
     font-weight: bold;
     color: #fff;
@@ -19,7 +19,7 @@ page-teacher {
 
   .card-subtitle {
     position: absolute;
-    top: 52%;
+    top: 90%;
     width: 100%;
     color: #fff;
     font-family: "Microsoft YaHei";
@@ -36,7 +36,21 @@ page-teacher {
   }
 
 }
+
+.action-sheets-basic-page {
+  .ion-md-copy {
+    color: #508AE4;
+  }
+  .action-sheet-cancel ion-icon {
+    color: #757575;
+  }
+  .action-sheet-destructive ion-icon {
+    color: #ED4248;
+  }
+}
+
 ion-lable{
   font-family: "Microsoft YaHei";
   font-size: 14px;
 }
+

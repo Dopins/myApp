@@ -7,18 +7,19 @@
 
 
     <ion-list>
-      <ion-item (click)="changePersonalInfo()">
+      <ion-item (click)="changePersonalInfo()" >
         <ion-avatar item-start>
-          <img src="../../assets/imgs/tou.jpg" alt="">
+          <img src="{{photo}}" onerror="this.src='./assets/imgs/person.png'"/>
         </ion-avatar>
         <h2 >{{userInfo?.username}}</h2>
-        <h4>{{userInfo?.email}}</h4>
-        <p>{{userInfo?.introduction}}</p>
+        <h4>{{userInfo?.name}}</h4>
       </ion-item>
-      <button ion-item  icon-start><ion-icon name="person" [ngStyle]="{'color':'#000'}"item-start></ion-icon>个人中心</button>
-      <button ion-item  icon-start><ion-icon name="mail" [ngStyle]="{'color':'#000'}"item-start></ion-icon>私信</button>
-      <button ion-item (click)="confirmLogout()" icon-start><ion-icon name="exit" [ngStyle]="{'color':'#000'}"item-start></ion-icon>退出账号</button>
+
+<!--       <button ion-item  icon-start><ion-icon name="mail" [ngStyle]="{'color':'#000','margin-left':'7px'}" item-start></ion-icon>私信</button> -->
+      <button ion-item  icon-start><ion-icon name="information-circle" [ngStyle]="{'color':'#000','margin-left':'7px'}"item-start></ion-icon>2.3</button>
+      <button ion-item (click)="confirmLogout()" icon-start><ion-icon name="exit" [ngStyle]="{'color':'#000','margin-left':'7px'}"item-start></ion-icon>退出账号</button>
     </ion-list>
+
 
 
 </ion-content>

@@ -4,6 +4,8 @@ import { DetailPage } from '../detail/detail';
 import { TeacherPage } from '../teacher/teacher'
 import { CourseService} from "../../services/httpService/course.service"
 import {FormPage} from "../form/form";
+import {HttpRequestService} from "../../services/httpService/httpRequest.service";
+import {AccountService} from "../../services/httpService/account.service";
 
 /**
  * Generated class for the CourseCenterPage page.
@@ -19,12 +21,16 @@ import {FormPage} from "../form/form";
 export class CourseCenterPage {
 
   segment: string = "study";
-  studyItems:Object[];
-  teachItems:Object[];
-  constructor(public navCtrl: NavController, public courseService:CourseService,
-              public toastCtrl: ToastController, public alertCtrl: AlertController, public actionSheetCtrl: ActionSheetController, public platform: Platform) {
+  host:string;
+  studyItems:any[];
+  teachItems:any[];
+  studyThumbnails:string[] = [];
+  teachThumbnails:string[] = [];
+  constructor(public navCtrl: NavController, public courseService:CourseService,private httpRequestService:HttpRequestService,public accountService:AccountService,
+              public toastCtrl: ToastController, public alertCtrl: AlertController,  public platform: Platform) {
     platform.ready().then(() => {
-
+      this.host =  httpRequestService.getCurrentHost();
+      this.getUserInfo();
     });
   }
 
@@ -36,35 +42,15 @@ export class CourseCenterPage {
     this.navCtrl.push(FormPage, { type : 'course' });
   }
 
-  presentActionSheet(e, id) {
-    let actionSheet = this.actionSheetCtrl.create({
-      title: 'options',
-      cssClass: 'action-sheets-basic-page',
-      buttons: [
-        {
-          text: '删除',
-          role: 'destructive',
-          icon: !this.platform.is('ios') ? 'trash' : null,
-          handler: () => {
-            this.deleteCourse(id);
-          }
-        }, {
-          text: '复制',
-          icon: !this.platform.is('ios') ? 'copy' : null,
-          handler: () => {
-            console.log('Archive clicked');
-          }
-        }, {
-          text: '取消',
-          role: 'cancel',
-          icon: !this.platform.is('ios') ? 'close' : null,
-          handler: () => {
-            console.log('Cancel clicked');
-          }
+  getUserInfo() {
+    this.accountService.getUserInfo().subscribe( res => {
+        if(res.hasCreator == "true"){
+          this.segment = "teach";
         }
-      ]
-    });
-    actionSheet.present();
+        else{
+          this.segment = "study";
+        }
+    } , error => {});
   }
 
   deleteCourse(id) {
@@ -112,6 +98,17 @@ export class CourseCenterPage {
       if(res.result=='success'){
         this.studyItems=res.student;
         this.teachItems=res.teacher;
+        this.studyThumbnails = [];
+        this.teachThumbnails = [];
+        for(let item of this.studyItems){
+          this.studyThumbnails.push(item.filepath);
+        }
+        for(let item of this.teachItems){
+          this.teachThumbnails.push(item.filepath);
+        }
+        this.formThumnail(this.studyThumbnails, 'study');
+        this.formThumnail(this.teachThumbnails, 'teach');
+
       }else{
         this.toastCtrl.create({
           message: '获取课程列表出错',
@@ -127,7 +124,34 @@ export class CourseCenterPage {
       }).present();
       console.log(error);
     });
+  }
 
+  formThumnail(filepaths,type)
+  {
+    let width:number = 80;
+    let height:number = 56;
+    this.courseService.formThumbnail(width, height, filepaths).subscribe( res => {
+      if(res.result == "success"){
+        if(type == 'study'){
+          this.studyThumbnails = res.thumbnail;
+        }
+        else{
+          this.teachThumbnails = res.thumbnail;
+        }
+      }
+    } , error => {})
+
+  }
+
+  copyCourse(id){
+    let param = {
+      courseId : id
+    };
+    this.courseService.copyCourse(param).subscribe( res => {
+      if(res.result == 'success'){
+        this.getAllCourseList();
+      }
+    }, error => {} )
   }
 
 }

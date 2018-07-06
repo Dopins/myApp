@@ -1,0 +1,37 @@
+<ion-header>
+
+    <ion-navbar>
+    <ion-title>批改作业</ion-title>
+  </ion-navbar>
+
+</ion-header>
+<ion-content>
+
+    <table class="dataintable">  
+        <caption class="captiontext" style="text-align:center">
+            <span>已交{{submit}}份，未交{{notSubmit}}份，共{{submit+notSubmit}}份，已批改{{correction}}份，未批改{{notCorrection}}份</span>
+        </caption>  
+        <thead>  
+            <tr>  
+                <th class="col-7">序号</th>   
+                <th class="col-7">头像</th>  
+                <th>作业名/提交时间</th>  
+                <th class="col-7">分数</th>   
+            </tr>  
+        </thead>  
+        <tbody>  
+            <tr *ngFor="let student of students;let i = index;"> 
+                <!--后台循环查找往页面添加数据-->  
+                <td>{{i+1}}</td>  
+                <td (click)=openPerson(i)>
+                    <img class="img" src="{{ host }}/lms/custom/{{student.photo}}" onerror="this.src='./assets/imgs/course.png'">
+                </td>  
+                <td (click)=openDetail(i)>{{student.attachName}} / {{student.createDate}}</td>  
+                <td (click)=modifyScore(i)>
+                    <span *ngIf="student.flag" class="score" (click)=modifyScore(i)>{{student.score}}</span>
+                    <input *ngIf="!student.flag" class="detail-input" (blur)="submitScore(i)" type="text" [(ngModel)]="student.score" >
+                </td>  
+            </tr>  
+        </tbody>  
+    </table>  
+</ion-content>

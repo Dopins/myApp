@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {NavController, NavParams, ToastController} from 'ionic-angular';
+import { LoadingController, NavController, NavParams, ToastController} from 'ionic-angular';
 import {TeacherService} from "../../services/httpService/teacher.service";
 import { CourseInfo } from "../../model/CourseInfo"
 import {SectionInfo} from "../../model/SectionInfo";
@@ -28,7 +28,7 @@ export class FormPage {
   fileParam:FileUploadParam;
   imgSrc:string;
   showImg:boolean = false;
-  courseInfo:CourseInfo = new CourseInfo(' ',' ','',' ',0,0,' ',' ','2018-01-01','2018-03-24', ' ', ' ');
+  courseInfo:CourseInfo = new CourseInfo('','','','',0.5,1,'','','2018-01-01','2018-03-24', '', '');
   isOpen:boolean = false;
   courseType:Object[];
   department:Object[];
@@ -36,7 +36,8 @@ export class FormPage {
   homeworkInfo:HomeworkInfo = new HomeworkInfo('', '','','','','','','', '','','','2018-01-01T12:00','2018-01-01T12:00');
   unit:Unit = new Unit('','', '','','','2018-01-01','2018-01-01',0,'','','','','','','','','');
 
-  constructor(public navCtrl: NavController, public teacherService:TeacherService,public toastCtrl: ToastController,  public navParams: NavParams) {
+  constructor(public navCtrl: NavController, public teacherService:TeacherService,public toastCtrl: ToastController, public loadingCtrl: LoadingController, public navParams: NavParams) {
+
     let formType = this.navParams.get('type');
     let courseId = this.navParams.get('id');
     let sectionId = this.navParams.get('sectionId');
@@ -51,6 +52,11 @@ export class FormPage {
       this.showUnit = false;
       this.showCourse = true;
       this.formCourse(courseId);
+      if(typeof(courseId) == "undefined"){
+        this.title = "创建课程";
+        this.courseInfo.startDate = this.getCurrentDate('date');
+        this.courseInfo.endDate = this.getCurrentDate('date');
+      }
     }
     else if(formType == 'section')
     {
@@ -68,6 +74,8 @@ export class FormPage {
         this.sectionInfo.courseId = courseId;
         this.sectionInfo.sectionId = '0';
         this.sectionInfo.orderId = orderId;
+        this.sectionInfo.startDate = this.navParams.get('startDate');
+        this.sectionInfo.endDate = this.navParams.get('endDate');
       }
     }
     else if(formType == 'homework'){
@@ -83,6 +91,8 @@ export class FormPage {
         this.homeworkInfo.groupId = this.fileParam.groupId;
         this.homeworkInfo.parentId = this.fileParam.parentId;
         this.homeworkInfo.coolviewId = this.fileParam.coolviewId;
+        this.homeworkInfo.startDate = this.getCurrentDate('time');
+        this.homeworkInfo.endDate =  this.navParams.get('endDate')+"T12:00";
       }
       else {
         this.formHomework(sectionId, homeworkId);
@@ -100,6 +110,8 @@ export class FormPage {
         this.unit.groupId = this.fileParam.groupId;
         this.unit.parentId = this.fileParam.parentId;
         this.unit.coolviewId = this.fileParam.coolviewId;
+        this.unit.startDate = this.navParams.get('startDate');
+        this.unit.endDate =  this.navParams.get('endDate');
       }
       else {
         this.formUnit(sectionId, unitId);
@@ -107,10 +119,68 @@ export class FormPage {
     }
   }
 
+  getCurrentDate(type){
+    let now = new Date();
+    let month:string;
+    let date:string;
+    let nowDate:string;
+    let trueMonth = now.getMonth()+1;
+    if(trueMonth < 10){
+      month = '0'+trueMonth;
+    }
+    else{
+      month = trueMonth.toString();
+    }
+    if(now.getDate()<10){
+      date = '0'+now.getDate();
+    }
+    else{
+      date = now.getDate().toString();
+    }
+    if(type == "time"){
+      nowDate = now.getFullYear().toString()+'-'+month+'-'+date+'T'+now.getHours()+":"+now.getMinutes();
+    }
+    else{
+      nowDate = now.getFullYear().toString()+'-'+month+'-'+date;
+    }
+    console.log(nowDate);
+    return nowDate;
+  }
+
+  compareDate(start, end){
+    let t1 = start.split('-');
+    let t2 = end.split('-');
+    if(t1[0] < t2[0]){
+      return true;
+    }
+    else if(t1[0] == t2[0]){
+      if(t1[1]<t2[1]){
+        return true;
+      }
+      else if(t1[1]==t2[1]){
+        if(t1[2]<t2[2]){
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+      else{
+        return false;
+      }
+    }
+    else {
+      return false;
+    }
+  }
+
   pdfUpload(event) {
     this.file = event.target.files[0];
-    let type = this.file.name.split('.')[1];
-    console.log(type);
+    if(typeof(this.file) == "undefined"){
+      return;
+    }
+    let arr = this.file.name.split('.');
+    let type = arr[arr.length-1];
     if(type != 'pdf')
     {
       this.toastCtrl.create({
@@ -120,6 +190,10 @@ export class FormPage {
       }).present();
       return;
     }
+    let loading = this.loadingCtrl.create({
+      content: '文件上传中...'
+    });
+    loading.present();
     let formData:FormData = new FormData();
     formData.append('coolviewId', this.fileParam.coolviewId);
     formData.append('groupId', this.fileParam.groupId);
@@ -128,12 +202,17 @@ export class FormPage {
     this.teacherService.uploadResourse(formData).subscribe( res => {
       this.unit.syllabusFile = res.file[0].filename;
       this.unit.syllabus = res.file[0].id;
+      loading.dismiss();
     } , error => {});
   }
 
   videoUpload(event) {
     this.file = event.target.files[0];
-    let type = this.file.name.split('.')[1];
+    if(typeof(this.file) == "undefined"){
+      return;
+    }
+    let arr = this.file.name.split('.');
+    let type = arr[arr.length-1];
     if(type != 'mp4' && type != 'avi' && type != 'rmvb')
     {
       this.toastCtrl.create({
@@ -143,6 +222,10 @@ export class FormPage {
       }).present();
       return;
     }
+    let loading = this.loadingCtrl.create({
+      content: '视频上传中...'
+    });
+    loading.present();
     let formData:FormData = new FormData();
     formData.append('coolviewId', this.fileParam.coolviewId);
     formData.append('groupId', this.fileParam.groupId);
@@ -152,12 +235,20 @@ export class FormPage {
       this.unit.slidesFile = res.file[0].filename;
       this.unit.slides = res.file[0].id;
       this.unit.slidesType = res.file[0].ext;
+      loading.dismiss();
     } , error => {});
   }
 
   fileUpload(event)
   {
     this.file = event.target.files[0];
+    if(typeof(this.file) == "undefined"){
+      return;
+    }
+    let loading = this.loadingCtrl.create({
+      content: '文件上传中...'
+    });
+    loading.present();
     let formData:FormData = new FormData();
     formData.append('coolviewId', this.fileParam.coolviewId);
     formData.append('groupId', this.fileParam.groupId);
@@ -166,6 +257,7 @@ export class FormPage {
     this.teacherService.uploadResourse(formData).subscribe( res => {
       this.unit.referenceFile = res.file[0].filename;
       this.unit.reference = res.file[0].id;
+      loading.dismiss();
     } , error => {});
   }
 
@@ -217,16 +309,19 @@ export class FormPage {
 
   imageUploaded(event) {
     this.file = event.target.files[0];
-    let type = this.file.type.split('/')[0];
-    if (type !='image') {
-      alert('请上传图片');
+    if(typeof(this.file) == "undefined"){
       return;
     }
-    let size = Math.round(this.file.size / 1024 / 1024);
-    if (size > 10) {
-      alert('图片大小不得超过3M');
+    let arr = this.file.name.split('.');
+    let type = arr[arr.length-1];
+    if (type !='jpeg' && type != 'jpg' && type != 'png' && type != 'gif') {
+      this.toastCtrl.create({
+        message: "请上传jpg,jpeg,png或gif格式的图片",
+        duration: 2000,
+        position: 'top'
+      }).present();
       return;
-    };
+    }
     var reader = new FileReader(); //新建FileReader对象
     reader.readAsDataURL(this.file); //读取为base64
     var that = this;
@@ -246,12 +341,17 @@ export class FormPage {
   imageRemoved() {
     this.file = null;
     this.imgSrc = '';
+    this.courseInfo.filename = '';
     this.showImg = false;
   }
 
   homeworkUpload(event) {
     this.file = event.target.files[0];
-    let type = this.file.name.split('.')[1];
+    if(typeof(this.file) == "undefined"){
+      return;
+    }
+    let arr = this.file.name.split('.');
+    let type = arr[arr.length-1];
     if(this.isDoc(type))
     {
       let formData:FormData = new FormData();
@@ -276,7 +376,11 @@ export class FormPage {
 
   answerUpload(event) {
     this.file = event.target.files[0];
-    let type = this.file.name.split('.')[1];
+    if(typeof(this.file) == "undefined"){
+      return;
+    }
+    let arr = this.file.name.split('.');
+    let type = arr[arr.length-1];
     if(this.isDoc(type))
     {
       let formData:FormData = new FormData();
@@ -352,7 +456,7 @@ export class FormPage {
           if(endDate != ''){
             endDate = endDate.split(' ')[0];
           }
-          let credit:number = parseInt(res.credit);
+          let credit:number = parseFloat(res.credit);
           let classHour:number = parseInt(res.classHour);
 
           this.courseInfo = new CourseInfo(courseId, res.name, res.filepath, res.textbook, credit, classHour, res.introduction, res.isOpen, startDate, endDate, res.type, res.department);
@@ -366,6 +470,31 @@ export class FormPage {
 
   saveCourse()
   {
+    let paramObj:any;
+    if(this.courseInfo.name == ''){
+      this.toastCtrl.create({
+        message: "课程名称不能为空",
+        duration: 1000,
+        position: 'top'
+      }).present();
+      return;
+    }
+    if(this.courseInfo.introduction == ''){
+      this.toastCtrl.create({
+        message: "课程介绍不能为空",
+        duration: 1000,
+        position: 'top'
+      }).present();
+      return;
+    }
+    if(!(this.compareDate(this.courseInfo.startDate, this.courseInfo.endDate)&&this.compareDate(this.getCurrentDate('date'),this.courseInfo.endDate))){
+      this.toastCtrl.create({
+        message: "时间输入不合法",
+        duration: 1000,
+        position: 'top'
+      }).present();
+      return;
+    }
     if(this.isOpen)
     {
       this.courseInfo.isOpen = '2'
@@ -378,7 +507,25 @@ export class FormPage {
     {
       this.courseInfo.filename = '';
     }
-    this.teacherService.saveCourse(this.courseInfo).subscribe( res => {
+    if(this.title == "创建课程"){
+      paramObj = {
+        name : this.courseInfo.name,
+        filename : this.courseInfo.filename,
+        textbook : this.courseInfo.textbook,
+        credit : this.courseInfo.credit,
+        classHour : this.courseInfo.classHour,
+        introduction : this.courseInfo.introduction,
+        isOpen : this.courseInfo.isOpen,
+        startDate : this.courseInfo.startDate,
+        endDate : this.courseInfo.endDate,
+        type : this.courseInfo.type,
+        department : this.courseInfo.department
+      }
+    }
+    else{
+      paramObj = this.courseInfo;
+    }
+    this.teacherService.saveCourse(paramObj).subscribe( res => {
       if(res.result == 'success')
       {
         this.toastCtrl.create({
@@ -415,7 +562,14 @@ export class FormPage {
 
   saveSection()
   {
-    //console.log(this.sectionInfo);
+    if(this.sectionInfo.name == ''){
+      this.toastCtrl.create({
+        message: "章节名称不能为空",
+        duration: 1000,
+        position: 'top'
+      }).present();
+      return;
+    }
     this.teacherService.saveSection(this.sectionInfo).subscribe( res => {
       if(res.result == 'success') {
         this.toastCtrl.create({
@@ -457,6 +611,14 @@ export class FormPage {
 
   saveHomework()
   {
+    if(this.homeworkInfo.name == ''){
+      this.toastCtrl.create({
+        message: "作业名称不能为空",
+        duration: 1000,
+        position: 'top'
+      }).present();
+      return;
+    }
     if(this.homeworkInfo.startDate != '')
     {
       let d1 = this.homeworkInfo.startDate.split('T');
@@ -522,7 +684,14 @@ export class FormPage {
 
   saveUnit()
   {
-    console.log(this.unit);
+    if(this.unit.name == ''){
+      this.toastCtrl.create({
+        message: "名称不能为空",
+        duration: 1000,
+        position: 'top'
+      }).present();
+      return;
+    }
     this.teacherService.saveUnit(this.unit).subscribe( res => {
       if(res.result == 'success'){
         this.toastCtrl.create({

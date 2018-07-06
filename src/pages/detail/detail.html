@@ -13,18 +13,18 @@
 
 </ion-header>
 <ion-content class="card-background-page">
-  <ion-fab top right edge>
+  <ion-fab *ngIf="courseDetail.isOpen == '4'" top right edge>
     <button ion-fab color="vibrant" mini><ion-icon name="more"></ion-icon></button>
     <ion-fab-list>
-      <button ion-fab>笔记</button>
+<!--       <button ion-fab>笔记</button>
       <button ion-fab>资料</button>
-      <button ion-fab>评价</button>
-      <button *ngIf="courseDetail.isOpen == '4'" (click)="ifQuitCourse()" ion-fab>退课</button>
+      <button ion-fab>评价</button> -->
+      <button (click)="ifQuitCourse()" ion-fab>退课</button>
     </ion-fab-list>
   </ion-fab>
 
   <ion-card>
-    <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{courseDetail.filepath}}"/>
+    <img src="{{host}}/lms/custom/{{courseDetail.filepath}}" [ngStyle]="{'height':'200px'}" onerror="this.src='./assets/imgs/course.png'"/>
     <div class="card-title">{{courseDetail.name}}</div>
     <div class="card-subtitle">{{courseDetail.startDateString}} - {{courseDetail.endDateString}}</div>
   </ion-card>
@@ -64,68 +64,137 @@
     <div *ngSwitchCase="'message'">
       <ion-list *ngFor="let message of messageList">
         <ion-card>
-          <ion-item>
-              <ion-icon name="notifications" [ngStyle]="{'color': '#4169E1'}"></ion-icon>
-            <h2 >
-              {{message.content}}
-            </h2>
-            <p >课程：{{message.courseName}}</p>
-            <p >发布人：{{message.creatorName}} 老师</p>
-            <p >发布时间：{{message.createDate}}</p>
-          </ion-item>
+            <ion-item (click)="expand(message)">
+              <ion-avatar item-start>
+                <img src="{{host}}/lms/custom/{{message.photo}}">
+              </ion-avatar>
+              <h3>{{message.creatorName}}</h3>
+              <p>{{message.content}}</p>
+              <ion-note [ngStyle]="{'font-size':'12px'}" item-end>{{message.createDate}}</ion-note>
+            </ion-item>
+          <div *ngIf="message.expand">
+            <ion-card-content>
+              <p>{{message.content}}<span [ngStyle]="{'margin-left':'10px'}" (click)="packUp(message)">[收起<ion-icon name="arrow-up"></ion-icon>]</span></p>
+            </ion-card-content>
+          </div>
         </ion-card>
       </ion-list>
     </div>
 
     <div *ngSwitchCase="'chapter'">
+
       <ion-list *ngFor="let section of courseResource">
+
         <ion-list-header>{{section.name}}</ion-list-header>
-        <ion-item *ngFor="let chapter of section.unit">
-          <button ion-item *ngIf="chapter.slidesType != ''" (click)="openVideoPage(chapter.id,chapter.name)" icon-start>
+
+        <ion-item-sliding *ngFor="let chapter of section.unit">
+          <button ion-item *ngIf="chapter.slidesType != ''" (click)="openVideoPage(chapter.id,chapter.name)" >
             <ion-icon name="logo-youtube" [ngStyle]="{'color': '#4169E1'}" item-start></ion-icon>
             {{chapter.name}}
           </button>
-          <button ion-item *ngIf="chapter.slidesType == ''" (click)="openVideoPage(chapter.id,chapter.name)" icon-start>
+          <button ion-item *ngIf="chapter.slidesType == ''" (click)="openVideoPage(chapter.id,chapter.name)" >
             <ion-icon name="document" color="secondary" item-start></ion-icon>
             {{chapter.name}}
           </button>
-        </ion-item>
-        <ion-item *ngFor="let item of section.homework">
+        </ion-item-sliding>
+
+        <ion-item-sliding *ngFor="let item of section.homework">
           <button ion-item  (click)="openHomeworkFromId(item.id)" icon-start>
             <ion-icon name="paper" [ngStyle]="{'color': '#4169E1'}" item-start></ion-icon>
             {{item.name}}
           </button>
-        </ion-item>
-        <ion-item *ngIf="section.quiz=='true'">
+        </ion-item-sliding>
+
+        <ion-item-sliding *ngIf="section.quiz=='true'">
           <button ion-item (click)="IntoQuiz(section.ifFinishedQuiz,section.id)" icon-start>
             <ion-icon name="star" [ngStyle]="{'color': '#4169E1'}" item-start></ion-icon>
              小测验
           </button>
-        </ion-item>
+        </ion-item-sliding>
+
       </ion-list>
     </div>
 
     <div class="list-avatar-page" *ngSwitchCase="'discuss'">
-      <button ion-button block>发表评论</button>
-      <ion-list  *ngFor="let discuss of discussList">
-        <ion-card>
+      <button ion-button (click)="addDiscuss()" block small>发起讨论</button>
+      <div *ngIf="addNewDiscuss">
+        <ion-item>
+          <ion-textarea [(ngModel)]="newDiscuss.content" [ngStyle]="{'height':'80px','border':'1px solid grey'}"></ion-textarea>
+        </ion-item>
+        <ion-item>
+          <ion-label>相关主题</ion-label>
+          <ion-select [(ngModel)]="unitId" cancelText="取消" okText="确定">
+            <ion-option value="0">请选择相关知识点</ion-option>
+            <ion-option  *ngFor="let unit of units" value="{{unit.id}}">{{unit.name}}</ion-option>
+          </ion-select>
+        </ion-item>
+        <ion-item  text-center>
+          <button ion-button (click)="saveDiscuss()" small>保存</button>
+          <button ion-button (click)="closeDiscuss()" small>取消</button>
+        </ion-item>
+      </div>
+
+      <ion-list>
+        <ion-card *ngFor="let discuss of discussList">
+          <ion-item-sliding>
+            <ion-item>
+              <ion-avatar item-start>
+                <img src="{{host}}/lms/custom/{{discuss.photo}}">
+              </ion-avatar>
+              <h3>{{discuss.creatorName}}</h3>
+              <p>{{discuss.content}}</p>
+              <ion-note [ngStyle]="{'font-size':'12px'}" item-end>{{discuss.createDate}}</ion-note>
+            </ion-item>
+            <ion-item-options *ngIf="currentUser == discuss.creatorId" [ngStyle]="{'width':'100px'}">
+              <button ion-button (click)="editDiscuss(discuss)" color="primary">
+                编辑
+              </button>
+              <button ion-button (click)="deleteDiscuss(discuss.id)" [ngStyle]="{'background-color':'#F00000'}">
+                删除
+              </button>
+            </ion-item-options>
+          </ion-item-sliding>
           <ion-item>
-            <ion-avatar item-start>
-              <img src="../../assets/imgs/tou.jpg">
-            </ion-avatar>
-            <h2>{{discuss.creatorName}}</h2>
-            <p>{{discuss.content}}</p>
-            <ion-note item-end>{{discuss.createDate}}</ion-note>
-          </ion-item>
-          <ion-item>
-            <button ion-button (click)="doUpvote(discuss.id)" small clear icon-start item-end>
+            <button ion-button small clear icon-start item-end>
+              <ion-icon name="attach"></ion-icon>
+              {{discuss.unitName}}
+            </button>
+            <button ion-button (click)="doUpvote(discuss)" small clear icon-start item-end>
               <ion-icon name="thumbs-up"></ion-icon>
               {{discuss.upvoteCount}}
             </button>
-            <button ion-button small clear item-end>
-              <ion-icon name="text">  {{discuss.replyCount}}</ion-icon>
+            <button ion-button (click)="showReplyList(discuss)" small clear icon-start item-end>
+              <ion-icon name="text"> </ion-icon>
+              {{discuss.replyCount}}
             </button>
           </ion-item>
+
+          <ion-item-group *ngIf="discuss.expand">
+            <ion-item-divider text-left color="light">回复:</ion-item-divider>
+            <ion-item-sliding color="light" *ngFor="let reply of replyList">
+              <ion-item>
+                <ion-avatar item-start>
+                  <img src="{{host}}/lms/custom/{{reply.photo}}">
+                </ion-avatar>
+                <h3>{{reply.creatorName}}</h3>
+                <p>{{reply.content}}</p>
+                <ion-note [ngStyle]="{'font-size':'12px'}" item-end>{{reply.createDateString}}</ion-note>
+              </ion-item>
+              <ion-item-options *ngIf="currentUser == reply.creatorId">
+                <button ion-button (click)="deleteReply(reply.id, discuss)" [ngStyle]="{'background-color':'#F00000'}">
+                  删除
+                </button>
+              </ion-item-options>
+            </ion-item-sliding>
+            <button *ngIf="newReply" (click)="addReply()" ion-item icon-start><ion-icon name="chatboxes"  [ngStyle]="{'color':'#282828','margin-left':'7px'}" item-start></ion-icon>发表回复</button>
+            <ion-item *ngIf="!newReply">
+              <ion-textarea [(ngModel)]="replyContent" [ngStyle]="{'height':'80px','border':'1px solid grey'}"></ion-textarea>
+            </ion-item>
+            <ion-item *ngIf="!newReply" text-center>
+              <button ion-button (click)="saveReply(discuss)" small>保存</button>
+              <button ion-button (click)="closeReply()" small>取消</button>
+            </ion-item>
+          </ion-item-group>
         </ion-card>
       </ion-list>
     </div>

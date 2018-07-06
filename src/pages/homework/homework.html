@@ -24,7 +24,9 @@
           <p >介绍：{{homework.hIntroduction}}</p>
           <p >截止日期：{{homework.deadlineDate}}</p>
           <p >已提交作业：{{homework.hsAttachName}}</p>
-          <p>上传作业：<input type="file" (change)="upload($event)"></p>
+          <p>上传作业：
+            <input type="file" #submitHomework (change)="upload($event)">
+          </p>
           </ion-item>
         </ion-card>
 </ion-content>

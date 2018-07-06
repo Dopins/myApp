@@ -1,20 +1,25 @@
-<ion-content >
-      <ion-card *ngFor="let openItem of openItems" >
-        <img src="http://lms.ccnl.scut.edu.cn/lms/custom/{{openItem.filepath}}">
-        <ion-card-title padding>{{openItem.name}}</ion-card-title>
-        <ion-row>
-          <ion-col>
-            <button ion-button icon-left clear small>
-              <ion-icon name="people"></ion-icon>
-              <div>{{openItem.courseTeacherString}}</div>
+<ion-content padding>
+    <ion-list>
+        <ion-item-sliding *ngFor="let openItem of openItems;let i = index">
+          <ion-item (click)="pushOpenPage(openItem.id)">
+            <ion-thumbnail item-start>
+              <img src="{{ host }}/lms/custom/{{openItem.filepath}}" onerror="this.src='./assets/imgs/course.png'">
+            </ion-thumbnail>
+            <h3>{{openItem.name}}</h3>
+            <p>
+              <span *ngIf="openItem.courseTeacherString">{{openItem.courseTeacherString}} / </span>
+              <span>{{openItem.classHour}}课时</span>
+            </p>
+          </ion-item>
+          <ion-item-options>
+            <button ion-button (click)="deleteCourse(teachItem.id)" [ngStyle]="{'background-color':'#F00000'}">
+              删除
             </button>
-          </ion-col>
-          <ion-col>
-            <button ion-button (click)="pushOpenPage(openItem.id)" icon-end clear small>
-              <div>进入</div>
-              <ion-icon name="arrow-forward"></ion-icon>
+            <button ion-button (click)="copyCourse(teachItem.id)" color="primary">
+              复制
             </button>
-          </ion-col>
-        </ion-row>
-      </ion-card>
+          </ion-item-options>
+        </ion-item-sliding>
+    </ion-list>
 </ion-content>
+

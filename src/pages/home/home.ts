@@ -2,17 +2,19 @@ import { Component } from '@angular/core';
 import { NavController,ToastController,Platform } from 'ionic-angular';
 import { CourseService} from "../../services/httpService/course.service"
 import { OpenPage } from  "../open/open"
+import {HttpRequestService} from "../../services/httpService/httpRequest.service";
 
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
 export class HomePage {
+  host:string;
   openItems:Object[];
-  constructor(public navCtrl: NavController, public courseService: CourseService,
+  constructor(public navCtrl: NavController, public courseService: CourseService,private httpRequestService:HttpRequestService,
               public toastCtrl: ToastController, public platform: Platform) {
     platform.ready().then(() => {
-
+      this.host =  httpRequestService.getCurrentHost();
     });
   }
 

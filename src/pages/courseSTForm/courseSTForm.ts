@@ -116,6 +116,7 @@ export class CourseSTFormPage {
                     console.log("error:"+error);
                 });
         }
+        this.navCtrl.pop();
 
     }
   }
